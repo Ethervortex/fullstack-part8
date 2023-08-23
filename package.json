@@ -1,0 +1,27 @@
+{
+  "name": "fullstack-part8",
+  "version": "1.0.0",
+  "description": "part8",
+  "main": "library-backend.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ethervortex/fullstack-part8.git"
+  },
+  "keywords": [
+    "fullstack",
+    "graphql"
+  ],
+  "author": "T. Ruokokoski",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ethervortex/fullstack-part8/issues"
+  },
+  "homepage": "https://github.com/Ethervortex/fullstack-part8#readme",
+  "dependencies": {
+    "@apollo/server": "^4.9.1",
+    "graphql": "^16.8.0"
+  }
+}
