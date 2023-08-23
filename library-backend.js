@@ -1,5 +1,6 @@
 const { ApolloServer } = require('@apollo/server')
 const { startStandaloneServer } = require('@apollo/server/standalone')
+const { v1: uuid } = require('uuid')
 
 let authors = [
   {
@@ -98,14 +99,88 @@ let books = [
 */
 
 const typeDefs = `
+  type Book {
+    title: String!
+    published: Int!
+    author: String!
+    id: ID!
+    genres: [String!]!
+  }
+  type Author {
+    name: String!
+    id: ID!
+    born: Int
+    bookCount: Int!
+  }
   type Query {
-    dummy: Int
+    bookCount: Int!
+    authorCount: Int!
+    allBooks(author: String, genre: String): [Book!]!
+    allAuthors: [Author!]!
+  }
+  type Mutation {
+    addBook(
+      title: String!
+      published: Int!
+      author: String!
+      genres: [String!]!
+    ): Book
+    editAuthor(
+      name: String!
+      setBornTo: Int!
+    ): Author
   }
 `
 
 const resolvers = {
   Query: {
-    dummy: () => 0
+    bookCount: () => books.length,
+    authorCount: () => authors.length,
+    allBooks: (root, args) => {
+      let filtered = books
+      if (args.author) {
+        filtered = filtered.filter(book => book.author === args.author)
+      }
+
+      if (args.genre) {
+        filtered = filtered.filter(book => book.genres.includes(args.genre))
+      }
+
+      return filtered
+    },
+    allAuthors: () => {
+      return authors.map(author => ({
+        name: author.name,
+        born: author.born,
+        id: author.id,
+        bookCount: books.filter(book => book.author === author.name).length
+      }))
+    }
+  },
+  Mutation: {
+    addBook: (root, args) => {
+      let author = authors.find(author => author.name === args.author)
+
+      if (!author) {
+        author = {
+          name: args.author,
+          id: uuid()
+        }
+        authors = authors.concat(author)
+      }
+
+      const book = { ...args, id: uuid() }
+      books = books.concat(book)
+      return book
+    },
+    editAuthor: (root, args) => {
+      let author = authors.find(author => author.name === args.name)
+
+      if (!author) return null
+      author.born = args.setBornTo
+      
+      return author
+    }
   }
 }
 
