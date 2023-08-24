@@ -30,8 +30,8 @@ const ALL_BOOKS = gql`
 const App = () => {
   const [page, setPage] = useState('authors')
 
-  const res_auth = useQuery(ALL_AUTHORS)
-  const res_book = useQuery(ALL_BOOKS)
+  const res_auth = useQuery(ALL_AUTHORS, { pollInterval: 2000 })
+  const res_book = useQuery(ALL_BOOKS, { pollInterval: 2000 })
 
   if ( res_auth.loading || res_book.loading) {
     return <div>loading...</div>
