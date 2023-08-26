@@ -3,6 +3,7 @@ import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
+import Recommend from './components/Recommend'
 import { gql, useQuery, useApolloClient } from '@apollo/client'
 
 const ALL_AUTHORS = gql`
@@ -28,12 +29,21 @@ const ALL_BOOKS = gql`
   }
 `
 
+const ME = gql`
+  query {
+    me {
+      favoriteGenre
+    }
+  }
+`
+
 const App = () => {
   const [page, setPage] = useState('authors')
   const [token, setToken] = useState(null)
 
   const res_auth = useQuery(ALL_AUTHORS, { pollInterval: 2000 })
   const res_book = useQuery(ALL_BOOKS, { pollInterval: 2000 })
+  const res_me = useQuery(ME, {pollInterval: 2000})
 
   const client = useApolloClient()
 
@@ -55,6 +65,7 @@ const App = () => {
         {token ? (
           <>
             <button onClick={() => setPage('add')}>add book</button>
+            <button onClick={() => setPage('recommend')}>recommend</button>
             <button onClick={logout}>logout</button>
           </>
         ) : (
@@ -67,6 +78,8 @@ const App = () => {
       <Books show={page === 'books'} books={res_book.data.allBooks}/>
 
       {page === 'add' && token && <NewBook show={page === 'add'} token={token} />}
+      {page === 'recommend' && token && 
+        <Recommend show={page === 'recommend'} token={token} books={res_book.data.allBooks} favoriteGenre={res_me.data.me.favoriteGenre}/>}
       {page === 'login' && (
         <LoginForm setToken={setToken} setPage={setPage}/> )}
     </div>
