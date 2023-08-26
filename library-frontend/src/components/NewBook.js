@@ -1,34 +1,49 @@
 import { useState } from 'react'
 import { gql, useMutation } from '@apollo/client'
 
+//author: {name} lisätty
 const ADD_BOOK = gql`
   mutation newBook($title: String!, $published: Int!, $author: String!, $genres: [String!]!) {
     addBook(title: $title, published: $published, author: $author, genres: $genres) {
       title
+      author {name}
       published
-      author
       genres
     }
   }
 `
 
-const NewBook = (props) => {
+const NewBook = ( props ) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [published, setPublished] = useState('')
   const [genre, setGenre] = useState('')
   const [genres, setGenres] = useState([])
 
-  const [ newBook ] = useMutation(ADD_BOOK)
+  const { token } = props
 
+  const [ newBook ] = useMutation(ADD_BOOK, {
+    context: {
+      headers: {
+        authorization: token ? `Bearer ${token}` : '',
+      },
+    },
+  }) 
+
+  //console.log("props.show:", props.show)
   if (!props.show) {
     return null
   }
 
   const submit = async (event) => {
     event.preventDefault()
+    console.log('Token:', token)
 
-    newBook({ variables: { title, published:parseInt(published), author, genres }})
+    const publishedInt = !isNaN(published) ? parseInt(published) : null
+    console.log('Variables:', typeof title, typeof publishedInt, typeof author, Array.isArray(genres))
+    
+
+    newBook({ variables: { title, published:publishedInt, author, genres }})
 
     console.log('add book...')
 

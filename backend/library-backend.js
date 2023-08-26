@@ -23,7 +23,7 @@ mongoose.connect(MONGODB_URI)
     console.log('error connection to MongoDB:', error.message)
   })
 
-
+/*
 let authors = [
   {
     name: 'Robert Martin',
@@ -101,6 +101,7 @@ let books = [
     genres: ['classic', 'revolution']
   },
 ]
+*/
 
 const typeDefs = `
   type Book {
@@ -202,7 +203,7 @@ const resolvers = {
     },
     allAuthors: async () => {
       const authorsFromMongo = await Author.find({})
-      console.log(authorsFromMongo)
+      // console.log(authorsFromMongo)
       const authorPromises = authorsFromMongo.map(async author => {
         const bookCount = await Book.countDocuments({ author: author._id })
         return {
@@ -245,7 +246,7 @@ const resolvers = {
     }, */
     addBook: async (root, args, context) => {
       let authorFromMongo = await Author.findOne({ name: args.author})
-
+      console.log(args.author)
       //Teht 8.16
       const currentUser = context.currentUser
       if (!currentUser) {
@@ -276,7 +277,8 @@ const resolvers = {
       const book = new Book({
         title: args.title,
         published: args.published,
-        author: authorFromMongo._id,
+        //author: authorFromMongo._id,
+        author: authorFromMongo,
         genres: args.genres
       })
       try {
@@ -293,7 +295,7 @@ const resolvers = {
       }
       return book
     },
-    editAuthor: async (root, args) => {
+    editAuthor: async (root, args, context) => {
       let authorFromMongo = await Author.findOne({ name: args.name })
 
       //Teht 8.16
@@ -349,12 +351,14 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  introspection: true
 })
 
 startStandaloneServer(server, {
   listen: { port: 4000 },
   context: async ({ req, res }) => {
     const auth = req ? req.headers.authorization : null
+    console.log('Authorization: ', auth)
     if (auth && auth.startsWith('Bearer ')) {
       const decodedToken = jwt.verify(
         auth.substring(7), process.env.JWT_SECRET
