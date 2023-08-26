@@ -64,7 +64,7 @@ const App = () => {
 
       <Authors show={page === 'authors'} authors={res_auth.data.allAuthors} token={token} />
 
-      <Books show={page === 'books'} books={res_book.data.allBooks} />
+      <Books show={page === 'books'} books={res_book.data.allBooks}/>
 
       {page === 'add' && token && <NewBook show={page === 'add'} token={token} />}
       {page === 'login' && (

@@ -198,8 +198,8 @@ const resolvers = {
       if (args.genre) {
         query = query.where('genres').in([args.genre])
       }
-      
-      return query.populate('author')
+      let books = await query.populate('author').exec()
+      return books
     },
     allAuthors: async () => {
       const authorsFromMongo = await Author.find({})
