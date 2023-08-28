@@ -4,7 +4,8 @@ import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 import Recommend from './components/Recommend'
-import { gql, useQuery, useApolloClient } from '@apollo/client'
+import { gql, useQuery, useApolloClient, useSubscription } from '@apollo/client'
+import { BOOK_ADDED } from './components/NewBook'
 
 const ALL_AUTHORS = gql`
   query {
@@ -46,6 +47,22 @@ const App = () => {
   const res_me = useQuery(ME, {pollInterval: 2000})
 
   const client = useApolloClient()
+
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      console.log(data)
+      const addedBook = data.data.bookAdded
+      window.alert(`${addedBook.title} added`)
+      
+      
+      /*
+      client.cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
+        return {
+          allBooks: allBooks.concat(addedBook),
+        }
+      }) */
+    }
+  })
 
   if ( res_auth.loading || res_book.loading) {
     return <div>loading...</div>
