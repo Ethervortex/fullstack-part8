@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { gql, useMutation } from '@apollo/client'
+import { updateCache, ALL_BOOKS } from '../App'
 
 //author: {name} lisätty
 const ADD_BOOK = gql`
@@ -14,6 +15,7 @@ const ADD_BOOK = gql`
 `
 const BOOK_DETAILS = gql`
   fragment BookDetails on Book {
+    id
     title
     author {name}
     published
@@ -43,6 +45,10 @@ const NewBook = ( props ) => {
       headers: {
         authorization: token ? `Bearer ${token}` : '',
       },
+    },
+    
+    update: (cache, response) => {
+      updateCache(cache, { query: ALL_BOOKS }, response.data.addBook)
     },
   }) 
 

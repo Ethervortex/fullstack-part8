@@ -18,7 +18,7 @@ const ALL_AUTHORS = gql`
   }
 `
 
-const ALL_BOOKS = gql`
+export const ALL_BOOKS = gql`
   query {
     allBooks {
       title
@@ -37,13 +37,31 @@ const ME = gql`
     }
   }
 `
+//Tehtävä 8.25 
+
+export const updateCache = (cache, query, addedBook) => {
+  // helper that is used to eliminate saving same book twice
+  const uniqByTitle = (a) => {
+    let seen = new Set()
+    return a.filter((item) => {
+      let k = item.title
+      return seen.has(k) ? false : seen.add(k)
+    })
+  }
+
+  cache.updateQuery(query, ({ allBooks }) => {
+    return {
+      allBooks: uniqByTitle(allBooks.concat(addedBook)),
+    }
+  })
+}
 
 const App = () => {
   const [page, setPage] = useState('authors')
   const [token, setToken] = useState(null)
 
   const res_auth = useQuery(ALL_AUTHORS, { pollInterval: 2000 })
-  const res_book = useQuery(ALL_BOOKS, { pollInterval: 2000 })
+  const res_book = useQuery(ALL_BOOKS, { pollInterval: 5000 })
   const res_me = useQuery(ME, {pollInterval: 2000})
 
   const client = useApolloClient()
@@ -52,15 +70,18 @@ const App = () => {
     onData: ({ data }) => {
       console.log(data)
       const addedBook = data.data.bookAdded
+      /*
+      if (res_book.data) {
+        client.cache.writeQuery({
+          query: ALL_BOOKS,
+          data: {
+            allBooks: [...res_book.data.allBooks, addedBook],
+          },
+        })
+      } */
       window.alert(`${addedBook.title} added`)
       
-      
-      /*
-      client.cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
-        return {
-          allBooks: allBooks.concat(addedBook),
-        }
-      }) */
+      updateCache(client.cache, { query: ALL_BOOKS }, addedBook)
     }
   })
 
